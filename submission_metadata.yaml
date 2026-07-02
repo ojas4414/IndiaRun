@@ -9,7 +9,7 @@ team_members:
     role: "AI Engineer"
 
 github_repo: "https://github.com/ojas4414/IndiaRun"
-sandbox_link: "https://huggingface.co/spaces/ojas4414/indiarun-ranker"   # TODO: deploy this Space (sandbox_app.py) before submitting
+sandbox_link: "https://huggingface.co/spaces/ojaasgandu/India_Run"   # verified live: uploads a candidates.jsonl sample, returns ranked output
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 
 compute:
