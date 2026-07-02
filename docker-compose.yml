@@ -1,0 +1,29 @@
+# AI Candidate-Ranking System
+#
+#   1. Put the challenge file at ./input/candidates.jsonl
+#   2. Run:  docker compose up --build
+#   3. Find the result at ./out/submission.csv
+#
+# The FAISS index is cached in ./artifacts, so subsequent runs skip the
+# (slow) precompute step and only re-run the fast, deterministic ranking.
+
+services:
+  ranker:
+    build: .
+    image: redrob-ranker:latest
+    container_name: redrob-ranker
+    environment:
+      CANDIDATES_PATH: /data/candidates.jsonl
+      ARTIFACTS_DIR: /app/artifacts
+      OUT_PATH: /out/submission.csv
+      # Model is baked into the image at build time; ranking makes no
+      # network calls.
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_OFFLINE: "1"
+    volumes:
+      - ./input:/data:ro            # candidates.jsonl (read-only input)
+      - ./artifacts:/app/artifacts  # cached FAISS index (persists between runs)
+      - ./out:/out                  # submission.csv output
+    # Mimic the judging box: CPU-only, <=16 GB RAM.
+    mem_limit: 16g
+    cpus: "4.0"

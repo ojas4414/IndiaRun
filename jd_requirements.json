@@ -1,0 +1,145 @@
+{
+  "required_skills": [
+    "embeddings", 
+    "retrieval", 
+    "sentence-transformers", 
+    "OpenAI embeddings", 
+    "BGE", 
+    "E5", 
+    "vector database", 
+    "hybrid search",
+    "Pinecone", 
+    "Weaviate", 
+    "Qdrant", 
+    "Milvus", 
+    "OpenSearch", 
+    "Elasticsearch", 
+    "FAISS",
+    "Python", 
+    "ranking evaluation", 
+    "NDCG", 
+    "MRR", 
+    "MAP", 
+    "offline-to-online correlation", 
+    "A/B test interpretation"
+  ],
+  "preferred_skills": [
+    "LoRA", 
+    "QLoRA", 
+    "PEFT", 
+    "LLM fine-tuning",
+    "learning-to-rank", 
+    "XGBoost", 
+    "neural ranking",
+    "HR-tech", 
+    "recruiting tech", 
+    "marketplace products",
+    "distributed systems", 
+    "large-scale inference optimization",
+    "open-source contributions", 
+    "AI/ML"
+  ],
+  "experience_range": [5, 9],
+  "ideal_experience": [6, 8],
+  "seniority": "senior",
+  "disqualifiers": {
+    "consulting_only": [
+      "TCS", "Infosys", "Wipro", "Accenture", 
+      "Cognizant", "Capgemini"
+    ],
+    "pure_research_no_production": true,
+    "title_chaser_pattern": true,
+    "no_recent_code": true,
+    "cv_speech_robotics_only": true
+  },
+  "location_preference": [
+    "Pune", "Noida", "Hyderabad", "Mumbai", "Delhi NCR"
+  ],
+  "notice_period_preference_days": 30,
+  "domain": "AI-native talent intelligence platform",
+  "culture_signals": [
+    "async-first", 
+    "writes code", 
+    "ships fast",
+    "disagree openly",
+    "decide quickly"
+  ],
+  "evidence_facets": [
+    {
+      "name": "prod_retrieval",
+      "query": "Built and deployed embeddings-based retrieval or semantic search systems to real users in production, handling embedding drift and retrieval-quality regression",
+      "weight": 1.0
+    },
+    {
+      "name": "vector_infra",
+      "query": "Operated vector databases or hybrid search infrastructure such as FAISS, Pinecone, Weaviate, Qdrant, OpenSearch or Elasticsearch in production",
+      "weight": 0.9
+    },
+    {
+      "name": "ranking_eval",
+      "query": "Designed evaluation frameworks for ranking systems using NDCG, MRR, MAP, A/B testing and offline-to-online correlation",
+      "weight": 1.0
+    },
+    {
+      "name": "shipped_scale",
+      "query": "Shipped an end-to-end ranking, search or recommendation system serving real users at large scale",
+      "weight": 1.0
+    },
+    {
+      "name": "llm_finetuning",
+      "query": "Fine-tuned large language models using LoRA, QLoRA or PEFT for a production use case",
+      "weight": 0.5
+    },
+    {
+      "name": "distributed_infra",
+      "query": "Built distributed systems or optimized large-scale model inference and serving",
+      "weight": 0.5
+    }
+  ],
+  "negative_facets": [
+    {
+      "name": "marketing_content",
+      "query": "Wrote marketing content, SEO articles, blog posts or managed social media and campaigns"
+    },
+    {
+      "name": "pure_research",
+      "query": "Academic research and publishing papers in a lab with no production deployment"
+    },
+    {
+      "name": "framework_tutorials",
+      "query": "Built demos and tutorials wiring LangChain to the OpenAI API for a side project"
+    },
+    {
+      "name": "generic_admin",
+      "query": "Managed people, operations, sales, accounting or customer support processes"
+    }
+  ],
+  "ideal_roles": [
+    "Senior AI Engineer",
+    "AI Engineer",
+    "Machine Learning Engineer",
+    "ML Engineer",
+    "Senior Machine Learning Engineer",
+    "Applied Scientist",
+    "Search Engineer",
+    "Ranking Engineer"
+  ],
+  "invalid_roles": [
+    "Marketing Manager",
+    "Accountant",
+    "Customer Support",
+    "Operations Manager",
+    "Graphic Designer",
+    "Content Writer",
+    "Sales Executive",
+    "Project Manager",
+    "HR Manager",
+    "Human Resources",
+    "Recruiter",
+    "Business Analyst",
+    "Mechanical Engineer",
+    "Civil Engineer",
+    "Sales Manager",
+    "Account Manager"
+  ]
+}

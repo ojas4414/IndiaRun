@@ -1,0 +1,41 @@
+team_name: "Antigravity-AI"
+primary_contact:
+  name: "Ojas"
+  email: "contact@example.com"
+  phone: "+91-0000000000"
+team_members:
+  - name: "Ojas"
+    email: "contact@example.com"
+    role: "AI Engineer"
+
+github_repo: "https://github.com/Antigravity-AI/redrob-ranker"
+sandbox_link: "https://huggingface.co/spaces/Antigravity-AI/redrob-ranker"
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+
+compute:
+  platform: "Local PC"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.11"
+  os: "Windows"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: true
+  pre_computation_time_minutes: 60
+
+ai_tools_used:
+  - "Gemini"
+  - "Antigravity IDE"
+
+ai_usage_summary: |
+  Used Gemini / Antigravity IDE as an agentic coding assistant to architect and implement the hybrid deterministic ranker, skill graph logic, and honeypot detector. AI tools were not used at runtime for the ranking pipeline (no LLM API calls are made by rank.py).
+
+methodology_summary: |
+  A two-phase hybrid deterministic ranking pipeline. Phase 1 (offline pre-computation): Embed candidates via sentence-transformers, build FAISS index, detect and exclude honeypots (impossible experience spans). Phase 2 (ranking, CPU, no-network, <5min): Retrieve top-500 semantic matches via FAISS. Score these using a deterministic hybrid heuristic: BFS-based skill graph transferability (25%), semantic similarity (25%), title/trajectory alignment to strictly enforce JD "keyword trap" (20%), and Redrob behavioral signals (20%). Strict disqualifiers filter out consulting-only careers and completely irrelevant roles. Exactly 100 top candidates are maintained in a bounded min-heap and output with templated, feature-derived reasoning.
+
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true

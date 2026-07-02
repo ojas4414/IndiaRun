@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Large / regenerable artifacts (rebuilt by precompute.py)
+artifacts/*.index
+artifacts/*.npy
+artifacts/candidate_ids.txt
+
+# Challenge data (never commit — it's large and provided separately)
+input/*.jsonl
+input/*.jsonl.gz
+data/*.jsonl
+candidates.jsonl
+
+# Outputs (keep the example submission.csv committed for reviewers)
+out/*.csv
+submission_b.csv
+
+# OS / editor
+.DS_Store
+*.code-workspace
