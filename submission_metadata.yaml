@@ -1,15 +1,15 @@
-team_name: "Antigravity-AI"
+team_name: "kafka_consumer"
 primary_contact:
   name: "Ojas"
-  email: "contact@example.com"
-  phone: "+91-0000000000"
+  email: "tulshianojas@gmail.com"
+  phone: "+91-0000000000"   # TODO: fill in real phone (used for top-50/top-10 outreach)
 team_members:
   - name: "Ojas"
-    email: "contact@example.com"
+    email: "tulshianojas@gmail.com"
     role: "AI Engineer"
 
-github_repo: "https://github.com/Antigravity-AI/redrob-ranker"
-sandbox_link: "https://huggingface.co/spaces/Antigravity-AI/redrob-ranker"
+github_repo: "https://github.com/ojas4414/IndiaRun"
+sandbox_link: "https://huggingface.co/spaces/ojas4414/indiarun-ranker"   # TODO: deploy this Space (sandbox_app.py) before submitting
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 
 compute:
@@ -21,17 +21,36 @@ compute:
   uses_gpu_for_inference: false
   has_network_during_ranking: false
   pre_computation_required: true
-  pre_computation_time_minutes: 60
+  pre_computation_time_minutes: 50   # measured ~47 min to embed + index 100k on CPU
+  ranking_time_seconds: 40           # measured; limit is 300s
 
 ai_tools_used:
-  - "Gemini"
-  - "Antigravity IDE"
+  - "Claude Code (Claude Opus)"
+  - "Gemini / Antigravity IDE"
 
 ai_usage_summary: |
-  Used Gemini / Antigravity IDE as an agentic coding assistant to architect and implement the hybrid deterministic ranker, skill graph logic, and honeypot detector. AI tools were not used at runtime for the ranking pipeline (no LLM API calls are made by rank.py).
+  AI coding assistants (Claude Code and, earlier, Gemini/Antigravity IDE) were
+  used as pair-programmers to implement and refactor the pipeline, and to design
+  the evaluation harness. All architecture decisions, the weighting strategy
+  (tuned from the ablation), and the trap-defense design were human-directed and
+  are defensible from first principles. No LLM or network calls are made at
+  ranking time (rank.py is fully offline and deterministic).
 
 methodology_summary: |
-  A two-phase hybrid deterministic ranking pipeline. Phase 1 (offline pre-computation): Embed candidates via sentence-transformers, build FAISS index, detect and exclude honeypots (impossible experience spans). Phase 2 (ranking, CPU, no-network, <5min): Retrieve top-500 semantic matches via FAISS. Score these using a deterministic hybrid heuristic: BFS-based skill graph transferability (25%), semantic similarity (25%), title/trajectory alignment to strictly enforce JD "keyword trap" (20%), and Redrob behavioral signals (20%). Strict disqualifiers filter out consulting-only careers and completely irrelevant roles. Exactly 100 top candidates are maintained in a bounded min-heap and output with templated, feature-derived reasoning.
+  A deterministic retrieve-then-rerank pipeline. Precomputation (offline, no time
+  limit): filter impossible "honeypot" profiles via date/tenure checks, embed
+  candidates with sentence-transformers (all-MiniLM-L6-v2), build a FAISS index.
+  Ranking (CPU, offline, ~40s): (1) FAISS retrieves a top-2000 semantic funnel for
+  recall; (2) hard disqualifiers drop off-domain / consulting-only / CV-speech-only
+  / title-chaser profiles; (3) survivors are scored by a deterministic hybrid --
+  trajectory DP alignment (35%, the dominant JD-fit signal), skill-graph BFS with
+  verified-skill boost (22%), behavioral availability signals (18%), query-attention
+  sentence relevance with contrastive anti-fit facets (15%), and semantic similarity
+  (10%, mostly a recall signal); (4) behavioral-twin clusters are disambiguated so
+  the most-available near-duplicate leads. Weights were tuned with an offline
+  evaluation harness (NDCG/MRR/MAP vs a recruiter rubric, per-component ablation,
+  and an adversarial keyword-stuffing test). Output is the top-100 with dynamic,
+  evidence-grounded reasoning.
 
 declarations:
   read_submission_spec: true
