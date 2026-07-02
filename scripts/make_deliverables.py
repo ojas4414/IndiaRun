@@ -172,7 +172,7 @@ def _title_slide(pdf):
     ax.text(0.5, 0.56, "Intelligent Candidate Discovery & Ranking Challenge",
             fontsize=16, color="#c7d6ea", ha="center")
     ax.text(0.5, 0.46, "Team  kafka_consumer", fontsize=18, color="white", ha="center")
-    ax.text(0.5, 0.40, "github.com/ojas4414/IndiaRun  |  Sandbox: huggingface.co/spaces/ojaasgandu/India_Run",
+    ax.text(0.5, 0.40, "github.com/ojas4414/IndiaRun  |  Sandbox: huggingface.co/spaces/ojas-tulshian/India_Run",
             fontsize=11.5, color="#9fb8d6", ha="center")
     ax.text(0.5, 0.20, "The LLM should understand.  It should never decide.",
             fontsize=15, color=LIGHT_BLUE, ha="center", style="italic")
@@ -408,7 +408,7 @@ def make_pdf():
         ax.text(0.5, 0.58, "Thank you", fontsize=32, color="white", weight="bold", ha="center")
         ax.text(0.5, 0.47, "Team kafka_consumer", fontsize=16, color="#c7d6ea", ha="center")
         ax.text(0.5, 0.38, "Code:     github.com/ojas4414/IndiaRun", fontsize=13, color="white", ha="center")
-        ax.text(0.5, 0.33, "Sandbox:  huggingface.co/spaces/ojaasgandu/India_Run", fontsize=13,
+        ax.text(0.5, 0.33, "Sandbox:  huggingface.co/spaces/ojas-tulshian/India_Run", fontsize=13,
                 color="white", ha="center")
         ax.text(0.5, 0.16, "Happy to walk through any design decision in detail.",
                 fontsize=13, color=LIGHT_BLUE, ha="center", style="italic")

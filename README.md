@@ -1,6 +1,6 @@
 # Redrob Hackathon: AI Candidate-Ranking System
 
-**Team kafka_consumer** | [approach_deck.pdf](approach_deck.pdf) | [APPROACH.md](APPROACH.md) | [Live sandbox](https://huggingface.co/spaces/ojaasgandu/India_Run)
+**Team kafka_consumer** | [approach_deck.pdf](approach_deck.pdf) | [APPROACH.md](APPROACH.md) | [Live sandbox](https://huggingface.co/spaces/ojas-tulshian/India_Run)
 
 ## The Central Thesis
 **The LLM should understand. It should never decide.**
@@ -105,14 +105,14 @@ Key findings (see [evaluation/report.md](evaluation/report.md)):
 - Weights in `scoring/hybrid_scorer.py` were tuned from this harness, not guessed.
 
 ## Sandbox
-**Live:** [huggingface.co/spaces/ojaasgandu/India_Run](https://huggingface.co/spaces/ojaasgandu/India_Run) — upload a small `candidates.jsonl` sample (any subset of the challenge file, up to 1000 rows) and see the full deterministic pipeline run end-to-end — honeypot filtering, skill-graph + trajectory scoring, contrastive sentence attention, and twin disambiguation.
+**Live:** [huggingface.co/spaces/ojas-tulshian/India_Run](https://huggingface.co/spaces/ojas-tulshian/India_Run) — upload a small `candidates.jsonl` sample (any subset of the challenge file, up to 1000 rows) and see the full deterministic pipeline run end-to-end — honeypot filtering, skill-graph + trajectory scoring, contrastive sentence attention, and twin disambiguation.
 
 [sandbox_app.py](sandbox_app.py) needs **no precomputed FAISS index** — it embeds the JD on the fly and scores whatever's uploaded directly (`HybridScorer.score_sample`), which also keeps the Space lightweight (no 150MB+ index to bundle).
 
 **Try locally:** `python sandbox_app.py` → opens at `http://localhost:7860`.
 
 **Redeploy / update the Space:**
-1. `git clone https://huggingface.co/spaces/ojaasgandu/India_Run` (auth: HF access token as the git password).
+1. `git clone https://huggingface.co/spaces/ojas-tulshian/India_Run` (auth: HF access token as the git password).
 2. Copy over the source packages this app imports (see [sandbox_app.py](sandbox_app.py)'s imports) + `jd_requirements.json` + `requirements.txt`, and [SPACE_README.md](SPACE_README.md) as the Space's `README.md`.
 3. `git add -A && git commit && git push` — the Space rebuilds automatically.
 
