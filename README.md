@@ -87,6 +87,12 @@ The Job Description explicitly states that finding candidates with the most AI k
 
 Skill graph + trajectory carry the majority of the ranking weight, so keyword-stuffed off-domain profiles cannot rise on semantic similarity alone.
 
+## Distinctive features
+- **Contrastive-facet sentence attention** ([docs/attention.md](docs/attention.md)) — query-conditioned attention pooling over sentences, with anti-fit facets that cancel sentence-level keyword stuffing. Surfaces the exact evidence sentence used in each reasoning.
+- **Behavioral-twin disambiguation** ([twins/twin_detector.py](twins/twin_detector.py)) — clusters near-duplicate profiles (role + experience + Jaccard skill overlap) and breaks the tie by availability, so paper-identical "twins" don't stack in the top-100.
+- **Adversarial robustness test** ([evaluation/adversarial.py](evaluation/adversarial.py)) — injects every JD skill + fake assessments into profiles that shouldn't rank and measures promotion into the top-100. Full system: **0%** for off-domain roles vs **100%** for a naive keyword ranker (see [evaluation/adversarial_report.md](evaluation/adversarial_report.md)).
+- **Proven determinism** — `make determinism` ranks twice and confirms byte-identical output.
+
 ## Evaluation & Ablation
 The JD explicitly requires evaluation rigor (NDCG, MRR, MAP, offline-to-online correlation). We ship an offline harness:
 ```bash
