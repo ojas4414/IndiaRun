@@ -1,4 +1,6 @@
-# Redrob Hackathon: AI Candidate-Ranking System (Antigravity-AI)
+# Redrob Hackathon: AI Candidate-Ranking System
+
+**Team kafka_consumer** | [approach_deck.pdf](approach_deck.pdf) | [APPROACH.md](APPROACH.md) | [Live sandbox](https://huggingface.co/spaces/ojaasgandu/India_Run)
 
 ## The Central Thesis
 **The LLM should understand. It should never decide.**
@@ -21,19 +23,14 @@ graph TD
     end
 
     subgraph "RANKING STEP (≤5 min, CPU, no network)"
-        CACHE --> FAISS[FAISS Similarity Retrieval]
+        CACHE --> FAISS[Stage 1: FAISS Retrieval - top 2000 funnel]
         REQ --> FAISS
-        FAISS --> TOP_N[Top ~2000 Semantic Matches - wide funnel]
-        TOP_N --> SKILL[Skill Graph BFS Scorer]
-        TOP_N --> TRAJ[Career Trajectory DP Scorer]
-        TOP_N --> BEHAV[Behavioral Signal Scorer]
-        TOP_N --> DISQ[Disqualifier Filter]
-        SKILL --> HYBRID[Hybrid Scorer - Deterministic]
-        TRAJ --> HYBRID
-        BEHAV --> HYBRID
-        DISQ --> HYBRID
-        HYBRID --> HEAP[Top-100 Min-Heap]
-        HEAP --> REASON[Reasoning Generator]
+        FAISS --> DISQ[Hard Disqualifiers - off-domain/consulting-only/etc.]
+        DISQ --> FEAT["Stage 2: Feature Rerank - trajectory 35% / skill-graph 22% / behavioral 18% / semantic 10%"]
+        FEAT --> ATTN[Stage 3: Contrastive-Facet Sentence Attention 15% - evidence extraction]
+        ATTN --> TWIN[Stage 4: Behavioral-Twin Disambiguation]
+        TWIN --> TOP100[Top-100, deterministic order]
+        TOP100 --> REASON[Evidence-Grounded Reasoning Generator]
         REASON --> CSV[submission.csv]
     end
 ```
@@ -65,7 +62,7 @@ python precompute.py
 ```
 
 ### 2. Deterministic Ranking
-This step loads the pre-computed embeddings and deterministically ranks the top 100 candidates based on semantic similarity, skill graph adjacency, career trajectory, and behavioral signals.
+This step loads the pre-computed embeddings and deterministically ranks the top 100 candidates via trajectory alignment, skill-graph adjacency, behavioral signals, contrastive sentence attention, and semantic similarity, then disambiguates behavioral twins.
 ```bash
 make rank
 # or
@@ -108,13 +105,25 @@ Key findings (see [evaluation/report.md](evaluation/report.md)):
 - Weights in `scoring/hybrid_scorer.py` were tuned from this harness, not guessed.
 
 ## Sandbox
-[sandbox_app.py](sandbox_app.py) is a Gradio app for HuggingFace Spaces: upload a small `candidates.jsonl` sample (any subset of the challenge file, up to 1000 rows) and see the full deterministic pipeline run end-to-end — honeypot filtering, skill-graph + trajectory scoring, contrastive sentence attention, and twin disambiguation.
+**Live:** [huggingface.co/spaces/ojaasgandu/India_Run](https://huggingface.co/spaces/ojaasgandu/India_Run) — upload a small `candidates.jsonl` sample (any subset of the challenge file, up to 1000 rows) and see the full deterministic pipeline run end-to-end — honeypot filtering, skill-graph + trajectory scoring, contrastive sentence attention, and twin disambiguation.
 
-It needs **no precomputed FAISS index** — it embeds the JD on the fly and scores whatever's uploaded directly (`HybridScorer.score_sample`), which also keeps the Space lightweight (no 150MB+ index to bundle).
+[sandbox_app.py](sandbox_app.py) needs **no precomputed FAISS index** — it embeds the JD on the fly and scores whatever's uploaded directly (`HybridScorer.score_sample`), which also keeps the Space lightweight (no 150MB+ index to bundle).
 
 **Try locally:** `python sandbox_app.py` → opens at `http://localhost:7860`.
 
-**Deploy to HuggingFace Spaces:**
-1. Create a Space at [huggingface.co/new-space](https://huggingface.co/new-space) — SDK: **Gradio**, hardware: **CPU basic** (free).
-2. Push this repo's contents to the Space's git remote, using [SPACE_README.md](SPACE_README.md) as the Space's `README.md` (it carries the required `app_file: sandbox_app.py` frontmatter).
-3. The Space builds automatically; use its URL as `sandbox_link` in `submission_metadata.yaml`.
+**Redeploy / update the Space:**
+1. `git clone https://huggingface.co/spaces/ojaasgandu/India_Run` (auth: HF access token as the git password).
+2. Copy over the source packages this app imports (see [sandbox_app.py](sandbox_app.py)'s imports) + `jd_requirements.json` + `requirements.txt`, and [SPACE_README.md](SPACE_README.md) as the Space's `README.md`.
+3. `git add -A && git commit && git push` — the Space rebuilds automatically.
+
+## Portal Deliverables
+- [approach_deck.pdf](approach_deck.pdf) — 20-slide write-up (problem, thesis, architecture, trap defenses, both novel components, evaluation methodology + results tables, sample output, limitations, tech stack).
+- [submission.xlsx](submission.xlsx) — the top-100 ranking in spreadsheet form.
+- Both are generated from `submission.csv` by [scripts/make_deliverables.py](scripts/make_deliverables.py); regenerate after any re-ranking with `python scripts/make_deliverables.py`.
+- [submission_metadata.yaml](submission_metadata.yaml) — team/contact info, AI-tool declaration, and methodology summary for the portal.
+
+## Determinism & Adversarial Robustness
+```bash
+make determinism    # ranks twice, diffs the output -- confirms byte-identical results
+make adversarial    # python -m evaluation.adversarial -- keyword-stuffing attack, see evaluation/adversarial_report.md
+```
