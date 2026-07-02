@@ -16,6 +16,7 @@ input/*.jsonl
 input/*.jsonl.gz
 data/*.jsonl
 candidates.jsonl
+tests/fixtures_sample.jsonl
 
 # Outputs (keep the example submission.csv committed for reviewers)
 out/*.csv

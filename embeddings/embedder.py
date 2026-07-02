@@ -4,6 +4,21 @@ from sentence_transformers import SentenceTransformer
 from typing import List, Dict
 from security.injection_defense import InjectionDefender
 
+
+def build_jd_text(jd_reqs: Dict) -> str:
+    """Flatten the JD requirements into the text embedded against candidates.
+    Shared by precompute.py (full-pool run) and sandbox_app.py (ad-hoc demo)
+    so both embed the JD identically.
+    """
+    return (
+        "Ideal roles: " + ", ".join(jd_reqs.get("ideal_roles", [])) + " | " +
+        "Required: " + ", ".join(jd_reqs.get("required_skills", [])) + " | " +
+        "Preferred: " + ", ".join(jd_reqs.get("preferred_skills", [])) + " | " +
+        f"Domain: {jd_reqs.get('domain', '')} | Seniority: {jd_reqs.get('seniority', '')} | " +
+        "Culture: " + ", ".join(jd_reqs.get("culture_signals", []))
+    )
+
+
 class CandidateEmbedder:
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         self.model = SentenceTransformer(model_name)

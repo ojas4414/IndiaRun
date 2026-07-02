@@ -3,7 +3,7 @@ import json
 from tqdm import tqdm
 from data.loader import stream_raw_candidates
 from honeypot.detector import HoneypotDetector
-from embeddings.embedder import CandidateEmbedder
+from embeddings.embedder import CandidateEmbedder, build_jd_text
 from embeddings.faiss_index import CandidateIndex
 
 def precompute(candidates_path: str, output_dir: str):
@@ -18,14 +18,7 @@ def precompute(candidates_path: str, output_dir: str):
     with open("jd_requirements.json", "r", encoding="utf-8") as f:
         jd_reqs = json.load(f)
         
-    jd_text = (
-        "Ideal roles: " + ", ".join(jd_reqs.get("ideal_roles", [])) + " | " +
-        "Required: " + ", ".join(jd_reqs["required_skills"]) + " | " +
-        "Preferred: " + ", ".join(jd_reqs["preferred_skills"]) + " | " +
-        f"Domain: {jd_reqs['domain']} | Seniority: {jd_reqs['seniority']} | " +
-        "Culture: " + ", ".join(jd_reqs.get("culture_signals", []))
-    )
-    jd_embedding = embedder.embed_jd(jd_text)
+    jd_embedding = embedder.embed_jd(build_jd_text(jd_reqs))
     np_path = os.path.join(output_dir, "jd_embedding.npy")
     import numpy as np
     np.save(np_path, jd_embedding)

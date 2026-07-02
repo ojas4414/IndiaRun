@@ -37,17 +37,29 @@ class HybridScorer:
     W_SEM = 0.10
     W_ATTN = 0.15
 
-    def __init__(self, jd_requirements: Dict[str, Any], index_path: str,
-                 ids_path: str, jd_embedding_path: str,
+    def __init__(self, jd_requirements: Dict[str, Any], index_path: str = None,
+                 ids_path: str = None, jd_embedding_path: str = None,
+                 jd_embedding=None,
                  use_attention: bool = True, attention_shortlist: int = 600,
-                 dedupe_twins: bool = True):
+                 dedupe_twins: bool = True, shared_model=None):
         self.jd_reqs = jd_requirements
 
-        self.index = CandidateIndex(dim=384)
-        self.index.load(index_path, ids_path)
+        # The FAISS index is only needed for score_all() (full-pool ranking
+        # from a prebuilt 100k-candidate index, used by rank.py). score_sample()
+        # -- used by the sandbox demo -- scores a small, explicitly-given
+        # candidate set directly and needs no index at all.
+        self.index = None
+        if index_path and ids_path:
+            self.index = CandidateIndex(dim=384)
+            self.index.load(index_path, ids_path)
 
         import numpy as np
-        self.jd_embedding = np.load(jd_embedding_path)
+        if jd_embedding is not None:
+            self.jd_embedding = np.asarray(jd_embedding, dtype=np.float32)
+        elif jd_embedding_path:
+            self.jd_embedding = np.load(jd_embedding_path)
+        else:
+            raise ValueError("Provide either jd_embedding or jd_embedding_path")
 
         self.skill_scorer = BFSScorer(jd_requirements)
         self.traj_scorer = TrajectoryScorer(jd_requirements)
@@ -59,7 +71,10 @@ class HybridScorer:
         env_off = os.environ.get("DISABLE_ATTENTION", "").lower() in ("1", "true", "yes")
         self.use_attention = use_attention and not env_off
         self.attention_shortlist = attention_shortlist
-        self.attn_scorer = SentenceAttentionScorer(jd_requirements) if self.use_attention else None
+        # Reuse an already-loaded sentence-transformer (e.g. the sandbox's
+        # CandidateEmbedder) instead of loading a second copy of the model.
+        self.attn_scorer = (SentenceAttentionScorer(jd_requirements, model=shared_model)
+                            if self.use_attention else None)
 
         # Behavioral-twin disambiguation.
         self.dedupe_twins = dedupe_twins
@@ -70,13 +85,47 @@ class HybridScorer:
         self.attention_info: Dict[str, Dict[str, Any]] = {}
 
     def _score_semantic(self, top_k_retrieval: int = 2000) -> List[Tuple[str, float]]:
+        if self.index is None:
+            raise RuntimeError(
+                "No FAISS index loaded (index_path/ids_path not given). Use "
+                "score_sample() for an explicit, ad-hoc candidate set instead."
+            )
         return self.index.search(self.jd_embedding, top_k=top_k_retrieval)
 
     def score_all(self, candidates_dict: Dict[str, Dict[str, Any]],
                   top_k_retrieval: int = 2000) -> List[Tuple[str, float]]:
-        """Return the top-100 (candidate_id, score), score-descending, ties
+        """Full-pool ranking via the prebuilt FAISS funnel (used by rank.py).
+        Returns the top-100 (candidate_id, score), score-descending, ties
         broken by ascending candidate_id."""
         semantic_matches = self._score_semantic(top_k_retrieval=top_k_retrieval)
+        return self._rerank(candidates_dict, semantic_matches)
+
+    def score_sample(self, candidates_dict: Dict[str, Dict[str, Any]],
+                     embedder) -> List[Tuple[str, float]]:
+        """Ad-hoc ranking over a small, explicitly-given candidate set (used by
+        the sandbox demo). No FAISS index is required: semantic similarity is
+        computed directly against every supplied candidate. Brute force is
+        exact and cheap at sandbox scale, and -- unlike ANN retrieval from the
+        prebuilt 100k-candidate index -- it can't silently drop an uploaded
+        sample whose candidate_ids don't happen to land in that index's top-K.
+        """
+        import numpy as np
+        ids = list(candidates_dict.keys())
+        texts = [embedder.extract_text(candidates_dict[cid]) for cid in ids]
+        if texts:
+            embs = np.asarray(embedder.embed_batch(texts), dtype=np.float32)
+        else:
+            embs = np.zeros((0, self.jd_embedding.shape[0]), dtype=np.float32)
+        semantic_matches = [(cid, float(emb @ self.jd_embedding))
+                            for cid, emb in zip(ids, embs)]
+        return self._rerank(candidates_dict, semantic_matches)
+
+    def _rerank(self, candidates_dict: Dict[str, Dict[str, Any]],
+               semantic_matches: List[Tuple[str, float]]) -> List[Tuple[str, float]]:
+        """Shared stage 2-4 scoring: feature rerank -> attention -> twin
+        disambiguation -> deterministic ordering. `semantic_matches` may come
+        from the FAISS funnel (score_all) or brute-force cosine (score_sample)."""
+        self.attention_info = {}  # reset per call so repeated calls don't leak
 
         # --- Stage 2: deterministic feature scoring over survivors ---------
         survivors: List[Dict[str, Any]] = []

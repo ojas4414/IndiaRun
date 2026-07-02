@@ -108,4 +108,13 @@ Key findings (see [evaluation/report.md](evaluation/report.md)):
 - Weights in `scoring/hybrid_scorer.py` were tuned from this harness, not guessed.
 
 ## Sandbox
-The ranking algorithm is available as a HuggingFace Spaces Gradio App, allowing users to upload a `candidates.jsonl` sample and view the deterministic ranking offline.
+[sandbox_app.py](sandbox_app.py) is a Gradio app for HuggingFace Spaces: upload a small `candidates.jsonl` sample (any subset of the challenge file, up to 1000 rows) and see the full deterministic pipeline run end-to-end — honeypot filtering, skill-graph + trajectory scoring, contrastive sentence attention, and twin disambiguation.
+
+It needs **no precomputed FAISS index** — it embeds the JD on the fly and scores whatever's uploaded directly (`HybridScorer.score_sample`), which also keeps the Space lightweight (no 150MB+ index to bundle).
+
+**Try locally:** `python sandbox_app.py` → opens at `http://localhost:7860`.
+
+**Deploy to HuggingFace Spaces:**
+1. Create a Space at [huggingface.co/new-space](https://huggingface.co/new-space) — SDK: **Gradio**, hardware: **CPU basic** (free).
+2. Push this repo's contents to the Space's git remote, using [SPACE_README.md](SPACE_README.md) as the Space's `README.md` (it carries the required `app_file: sandbox_app.py` frontmatter).
+3. The Space builds automatically; use its URL as `sandbox_link` in `submission_metadata.yaml`.
